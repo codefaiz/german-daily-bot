@@ -66,11 +66,11 @@ while True:
 
             if text == "/start":
                 welcome = (
-                    f"👋 Hallo {name}!\n\n"
-                    "🇩🇪 Willkommen beim German Daily Bot!\n"
-                    "🇬🇧 Welcome to German Daily Bot!\n\n"
+                    f"👋 <b>Hallo {name}!</b>\n\n"
+                    "🇩🇪 Willkommen beim <b>German Daily Bot</b>\n"
+                    "🇬🇧 Welcome to <b>German Daily Bot</b>\n\n"
                     "📘 Start learning German step by step.\n"
-                    "Click below to begin Day 1."
+                    "Click the button below to begin <b>Day 1</b>."
                 )
 
                 buttons = {
@@ -94,24 +94,25 @@ while True:
                 lesson = (
                     "📘 <b>German Day 1</b>\n\n"
                     "1️⃣ <b>Hallo</b> = Hello\n"
-                    "Pronunciation: HA-lo\n"
-                    "Example: Hallo! Wie geht's? (HA-lo! Vee gayt es geets?)\n\n"
+                    "<code>Pronunciation:</code> HA-lo\n"
+                    "<i>Example:</i> Hallo! Wie geht's? (HA-lo! Vee gayt es geets?)\n\n"
                     "2️⃣ <b>Wie geht es dir?</b> = How are you?\n"
-                    "Pronunciation: Vee gayt es deer\n"
-                    "Example: Wie geht es dir heute? (Vee gayt es deer hoy-te?)\n\n"
+                    "<code>Pronunciation:</code> Vee gayt es deer\n"
+                    "<i>Example:</i> Wie geht es dir heute? (Vee gayt es deer hoy-te?)\n\n"
                     "3️⃣ <b>Woher kommst du?</b> = Where are you from?\n"
-                    "Pronunciation: Vo-hair komst doo\n"
-                    "Example: Woher kommst du? Ich komme aus Deutschland. (Vo-hair komst doo? Ish komme ous Dooych-lahnd.)\n\n"
-                    "📝 Practice:\n"
-                    "- Say each sentence aloud 3 times\n"
-                    "- Try greeting a friend in German\n"
-                    "- Write your own answer to “Woher kommst du?” in German"
+                    "<code>Pronunciation:</code> Vo-hair komst doo\n"
+                    "<i>Example:</i> Woher kommst du? Ich komme aus Deutschland. "
+                    "(Vo-hair komst doo? Ish komme ous Dooych-lahnd.)\n\n"
+                    "📝 <b>Practice Tips:</b>\n"
+                    "• Say each sentence aloud 3 times\n"
+                    "• Try greeting a friend in German\n"
+                    "• Write your own answer to “Woher kommst du?” in German\n"
                 )
 
-                # Only practice tips, no quiz button yet
+                # Only practice tips first
                 send_message(chat_id, lesson)
 
-                # Add a button for quiz separately
+                # Quiz button separately
                 quiz_button = {
                     "inline_keyboard": [
                         [{"text": "📝 Take Mini Quiz", "callback_data": "quiz_day1"}]
