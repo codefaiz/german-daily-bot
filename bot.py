@@ -34,75 +34,78 @@ print("Bot running...")
 offset = None
 
 while True:
-    updates = get_updates(offset)
+    try:
+        updates = get_updates(offset)
 
-    if updates.get("result"):
-        for update in updates["result"]:
-            offset = update["update_id"] + 1
+        if updates.get("result"):
+            for update in updates["result"]:
+                offset = update["update_id"] + 1
 
-            # ---- Handle button clicks FIRST ----
-            if "callback_query" in update:
-                query = update["callback_query"]
-                callback_id = query["id"]
-                chat = query["message"]["chat"]
-                chat_id = chat["id"]
+                # -------- BUTTON HANDLER --------
+                if "callback_query" in update:
+                    query = update["callback_query"]
+                    callback_id = query["id"]
+                    chat_id = query["message"]["chat"]["id"]
+                    data = query["data"]
 
-                # get user name safely
-                user = query["from"]
-                name = user.get("first_name", "Friend")
+                    # stop loading animation immediately
+                    answer_callback(callback_id)
 
-                data = query["data"]
+                    if data == "day1":
+                        user = query["from"]
+                        name = user.get("first_name", "Friend")
 
-                answer_callback(callback_id)
+                        lesson = (
+                            f"📘 <b>German Day 1 — Basics</b>\n\n"
 
-                if data == "day1":
-                    lesson = (
-                        f"📘 <b>German Day 1 — Basics</b>\n\n"
+                            "Hallo = Hello\n"
+                            "Pronunciation: HA-lo\n\n"
 
-                        "Hallo = Hello\n"
-                        "Pronunciation: HA-lo\n\n"
+                            "Wie geht es dir? = How are you?\n"
+                            "Pronunciation: Vee gayt es deer\n\n"
 
-                        "Wie geht es dir? = How are you?\n"
-                        "Pronunciation: Vee gayt es deer\n\n"
+                            "Woher kommst du? = Where are you from?\n"
+                            "Pronunciation: Vo-hair komst doo\n\n"
 
-                        "Woher kommst du? = Where are you from?\n"
-                        "Pronunciation: Vo-hair komst doo\n\n"
+                            f"Ich bin {name}. = I am {name}.\n"
+                            "Pronunciation: Ikh bin <your name>\n\n"
 
-                        f"Ich bin {name}. = I am {name}.\n"
-                        "Pronunciation: Ikh bin <your name>\n\n"
+                            "Danke = Thank you\n"
+                            "Bitte = Please / Welcome\n\n"
 
-                        "Danke = Thank you\n"
-                        "Bitte = Please / Welcome\n\n"
+                            "🗣 Practice:\n"
+                            "Reply: Hallo, ich bin <your name>\n\n"
 
-                        "🗣 Practice:\n"
-                        "Reply: Hallo, ich bin <your name>\n\n"
+                            "✅ Day 1 Completed!"
+                        )
 
-                        "✅ Day 1 Completed!"
-                    )
+                        send_message(chat_id, lesson)
 
-                    send_message(chat_id, lesson)
+                # -------- MESSAGE HANDLER --------
+                if "message" in update:
+                    msg = update["message"]
+                    chat_id = msg["chat"]["id"]
+                    text = msg.get("text", "")
+                    name = msg["from"].get("first_name", "Friend")
 
-            # ---- Handle messages ----
-            if "message" in update:
-                msg = update["message"]
-                chat_id = msg["chat"]["id"]
-                text = msg.get("text", "")
-                name = msg["from"].get("first_name", "Friend")
+                    if text == "/start":
+                        welcome = (
+                            f"👋 Hallo {name}!\n\n"
+                            "🇩🇪 Willkommen beim German Daily Bot\n"
+                            "🇬🇧 Welcome to German Daily Bot\n\n"
+                            "Click below to begin learning."
+                        )
 
-                if text == "/start":
-                    welcome = (
-                        f"👋 Hallo {name}!\n\n"
-                        "🇩🇪 Willkommen beim German Daily Bot\n"
-                        "🇬🇧 Welcome to German Daily Bot\n\n"
-                        "Click below to begin learning."
-                    )
+                        buttons = {
+                            "inline_keyboard": [
+                                [{"text": "📘 Start Day 1", "callback_data": "day1"}]
+                            ]
+                        }
 
-                    buttons = {
-                        "inline_keyboard": [
-                            [{"text": "📘 Start Day 1", "callback_data": "day1"}]
-                        ]
-                    }
+                        send_message(chat_id, welcome, buttons)
 
-                    send_message(chat_id, welcome, buttons)
+        time.sleep(1)
 
-    time.sleep(1)
+    except Exception as e:
+        print("Error:", e)
+        time.sleep(3)
