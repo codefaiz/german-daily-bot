@@ -20,7 +20,7 @@ HEADERS = {
     "Accept": "application/vnd.github+json"
 }
 
-# ---------------- FUNCTIONS ----------------
+# ---------------- GITHUB FUNCTIONS ----------------
 def get_users():
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILE}?ref={GITHUB_BRANCH}"
     r = requests.get(url, headers=HEADERS)
@@ -43,21 +43,34 @@ def update_users(users, sha):
     r.raise_for_status()
     return r.json()["content"]["sha"]
 
+# ---------------- TELEGRAM FUNCTIONS ----------------
 def send_message(chat_id, text, buttons=None):
     data = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
     if buttons:
         data["reply_markup"] = json.dumps(buttons)
-    requests.post(BASE_URL + "/sendMessage", data=data)
+    try:
+        r = requests.post(BASE_URL + "/sendMessage", data=data, timeout=10)
+        r.raise_for_status()
+    except requests.RequestException as e:
+        print("Send message error:", e)
 
 def answer_callback(callback_id):
-    requests.post(BASE_URL + "/answerCallbackQuery", data={"callback_query_id": callback_id})
+    try:
+        requests.post(BASE_URL + "/answerCallbackQuery", data={"callback_query_id": callback_id}, timeout=5)
+    except requests.RequestException as e:
+        print("Callback error:", e)
 
 def get_updates(offset=None):
     params = {"timeout": 100, "offset": offset}
-    r = requests.get(BASE_URL + "/getUpdates", params=params)
-    return r.json()
+    try:
+        r = requests.get(BASE_URL + "/getUpdates", params=params, timeout=110)
+        r.raise_for_status()
+        return r.json()
+    except requests.RequestException as e:
+        print("Get updates error:", e)
+        return {}
 
-# ---------------- BOT START ----------------
+# ---------------- BOT LOOP ----------------
 print("🤖 German Daily Bot running...")
 offset = None
 
@@ -93,13 +106,19 @@ while True:
                 data = query["data"]
                 callback_id = query["id"]
 
+                # Stop button loading animation immediately
                 answer_callback(callback_id)
 
-                # Fetch latest users.json
-                users, sha = get_users()
-
-                # Mark Day 1 complete
                 if data == "day1":
+                    # Fetch users.json from GitHub safely
+                    try:
+                        users, sha = get_users()
+                    except Exception as e:
+                        send_message(chat_id, "⚠️ Sorry, something went wrong. Please try again later.")
+                        print("GitHub fetch error:", e)
+                        continue
+
+                    # Send Day 1 lesson
                     lesson = (
                         "📘 <b>German – Day 1: Basics</b>\n\n"
                         "👋 <b>Greeting</b>\n<b>Hallo</b> = Hello\nPronunciation: <i>HA-lo</i>\n\n"
@@ -113,9 +132,12 @@ while True:
                     )
                     send_message(chat_id, lesson)
 
-                    # Update user progress on GitHub
-                    users[str(chat_id)] = {"day":1, "last_active": time.strftime("%Y-%m-%d")}
-                    sha = update_users(users, sha)
+                    # Update GitHub progress safely
+                    try:
+                        users[str(chat_id)] = {"day":1, "last_active": time.strftime("%Y-%m-%d")}
+                        sha = update_users(users, sha)
+                    except Exception as e:
+                        print("GitHub update error:", e)
 
     except Exception as e:
         print("Error:", e)
