@@ -7,16 +7,16 @@ TOKEN = os.getenv("BOT_TOKEN")
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
 def send_message(chat_id, text, buttons=None):
-    payload = {
+    data = {
         "chat_id": chat_id,
         "text": text,
         "parse_mode": "HTML"
     }
 
     if buttons:
-        payload["reply_markup"] = json.dumps(buttons)
+        data["reply_markup"] = json.dumps(buttons)
 
-    requests.post(BASE_URL + "/sendMessage", data=payload)
+    requests.post(BASE_URL + "/sendMessage", data=data)
 
 def answer_callback(callback_id):
     requests.post(
@@ -40,34 +40,53 @@ while True:
         for update in updates["result"]:
             offset = update["update_id"] + 1
 
-            # ---- Handle button clicks FIRST ----
+            # ---------- Button Click ----------
             if "callback_query" in update:
                 query = update["callback_query"]
                 callback_id = query["id"]
                 chat_id = query["message"]["chat"]["id"]
                 data = query["data"]
+                name = query["from"].get("first_name", "Friend")
 
                 answer_callback(callback_id)
 
                 if data == "day1":
                     lesson = (
                         "📘 <b>German Day 1 — Basics</b>\n\n"
+
+                        "👋 Greeting\n"
                         "Hallo = Hello\n"
                         "Pronunciation: HA-lo\n\n"
+
+                        "😊 Asking condition\n"
                         "Wie geht es dir? = How are you?\n"
                         "Pronunciation: Vee gayt es deer\n\n"
+
+                        "🌍 Asking origin\n"
                         "Woher kommst du? = Where are you from?\n"
                         "Pronunciation: Vo-hair komst doo\n\n"
-                        "Ich bin <dein Name>. = I am <your name>.\n"
-"Pronunciation: Ikh bin dine NAH-meh\n\n"
+
+                        "🙋 Introducing yourself\n"
+                        f"Ich bin {name}. = I am {name}.\n"
+                        "Pronunciation: Ikh bin <name>\n\n"
+
+                        "🙏 Polite words\n"
                         "Danke = Thank you\n"
-                        "Bitte = Please\n\n"
+                        "Pronunciation: DAN-ke\n\n"
+
+                        "Bitte = Please / You're welcome\n"
+                        "Pronunciation: BIT-te\n\n"
+
+                        "🗣 Practice Task\n"
+                        "Reply with:\n"
+                        "Hallo, ich bin <your name>\n\n"
+
                         "✅ Day 1 Completed!"
                     )
 
                     send_message(chat_id, lesson)
 
-            # ---- Handle messages ----
+            # ---------- Messages ----------
             if "message" in update:
                 msg = update["message"]
                 chat_id = msg["chat"]["id"]
@@ -79,6 +98,7 @@ while True:
                         f"👋 Hallo {name}!\n\n"
                         "🇩🇪 Willkommen beim German Daily Bot\n"
                         "🇬🇧 Welcome to German Daily Bot\n\n"
+                        "📘 Learn German step by step.\n"
                         "Click below to begin learning."
                     )
 
