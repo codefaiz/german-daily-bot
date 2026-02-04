@@ -75,21 +75,34 @@ while True:
                 answer_callback(callback_id)
 
                 if data == "day1":
-                    lesson = (
-                        "📘 <b>German Day 1</b>\n\n"
+    lesson = (
+        "📘 <b>German Day 1 — Basics</b>\n\n"
 
-                        "Hallo = Hello\n"
-                        "Pronunciation: HA-lo\n\n"
+        "✅ Greeting\n"
+        "Hallo = Hello\n"
+        "Pronunciation: HA-lo\n\n"
 
-                        "Wie geht es dir? = How are you?\n"
-                        "Pronunciation: Vee gayt es deer\n\n"
+        "✅ Asking How Someone Is\n"
+        "Wie geht es dir? = How are you?\n"
+        "Pronunciation: Vee gayt es deer\n\n"
 
-                        "Woher kommst du? = Where are you from?\n"
-                        "Pronunciation: Vo-hair komst doo\n\n"
+        "Answer examples:\n"
+        "Mir geht es gut = I am fine\n"
+        "Pronunciation: Meer gayt es goot\n\n"
 
-                        "Practice speaking today! 🇩🇪"
-                    )
+        "✅ Asking Origin\n"
+        "Woher kommst du? = Where are you from?\n"
+        "Pronunciation: Vo-hair komst doo\n\n"
 
-                    send_message(chat_id, lesson)
+        "Answer example:\n"
+        "Ich komme aus Indien = I come from India\n"
+        "Pronunciation: Ikh kom-me owss In-dee-en\n\n"
 
-    time.sleep(1)
+        "🎯 Practice Today:\n"
+        "Say in German:\n"
+        "Hello, I am fine, I come from India.\n\n"
+
+        "See you in Day 2! 🇩🇪"
+    )
+
+    send_message(chat_id, lesson)
