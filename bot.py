@@ -92,28 +92,28 @@ while True:
             # -------- Day 1 Lesson --------
             if data == "day1":
                 lesson = (
-                    "📘 <b>German Day 1</b>\n\n"
+    "📘 <b>German Day 1</b>\n\n"
 
-                    "1️⃣ <b>Hallo</b>\n"
-                    "Hello\n"
-                    "<code>Pronunciation:</code> HA-lo\n"
-                    "<i>Example:</i> Hallo! Wie geht's? = Hello! How are you?\n\n"
+    "1️⃣ <b>Hallo</b>\n"
+    "Hello\n"
+    "<code>Pronunciation:</code> HA-lo\n"
+    "<i>Example:</i> Hallo! Wie geht's? = Hello! How are you? (HA-lo! Vee gayt es geets?)\n\n"
 
-                    "2️⃣ <b>Wie geht es dir?</b>\n"
-                    "How are you?\n"
-                    "<code>Pronunciation:</code> Vee gayt es deer\n"
-                    "<i>Example:</i> Wie geht es dir heute? = How are you today?\n\n"
+    "2️⃣ <b>Wie geht es dir?</b>\n"
+    "How are you?\n"
+    "<code>Pronunciation:</code> Vee gayt es deer\n"
+    "<i>Example:</i> Wie geht es dir heute? = How are you today? (Vee gayt es deer hoy-te?)\n\n"
 
-                    "3️⃣ <b>Woher kommst du?</b>\n"
-                    "Where are you from?\n"
-                    "<code>Pronunciation:</code> Vo-hair komst doo\n"
-                    "<i>Example:</i> Woher kommst du? Ich komme aus Deutschland. = Where are you from? I come from Germany.\n\n"
+    "3️⃣ <b>Woher kommst du?</b>\n"
+    "Where are you from?\n"
+    "<code>Pronunciation:</code> Vo-hair komst doo\n"
+    "<i>Example:</i> Woher kommst du? Ich komme aus Deutschland. = Where are you from? I come from Germany. (Vo-hair komst doo? Ish komme ous Dooych-lahnd.)\n\n"
 
-                    "📝 <b>Practice Tips:</b>\n"
-                    "• Say each sentence aloud 3 times\n"
-                    "• Try greeting a friend in German\n"
-                    "• Write your own answer to “Woher kommst du?” in German\n"
-                )
+    "📝 <b>Practice Tips:</b>\n"
+    "• Say each sentence aloud 3 times\n"
+    "• Try greeting a friend in German\n"
+    "• Write your own answer to “Woher kommst du?” in German\n"
+)
 
                 # Send lesson first
                 send_message(chat_id, lesson)
