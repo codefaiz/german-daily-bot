@@ -1,0 +1,35 @@
+{
+  "day1": {
+    "title": "German Day 1",
+    "words": [
+      {
+        "word": "Hallo",
+        "meaning": "Hello",
+        "pronunciation": "HA-lo",
+        "example": "Hallo! Wie geht's? = Hello! How are you?"
+      },
+      {
+        "word": "Wie geht es dir?",
+        "meaning": "How are you?",
+        "pronunciation": "Vee gayt es deer",
+        "example": "Wie geht es dir heute? = How are you today?"
+      },
+      {
+        "word": "Woher kommst du?",
+        "meaning": "Where are you from?",
+        "pronunciation": "Vo-hair komst doo",
+        "example": "Woher kommst du? Ich komme aus Deutschland. = Where are you from? I come from Germany."
+      }
+    ],
+    "practice_tips": [
+      "Say each sentence aloud 3 times",
+      "Try greeting a friend in German",
+      "Write your own answer to “Woher kommst du?” in German"
+    ],
+    "quiz": [
+      "How do you say 'Hello' in German?",
+      "How do you ask 'How are you?' in German?",
+      "How do you ask someone where they are from in German?"
+    ]
+  }
+}
