@@ -23,14 +23,20 @@ HEADERS = {
 # ---------------- GITHUB FUNCTIONS ----------------
 def get_users():
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILE}?ref={GITHUB_BRANCH}"
-    r = requests.get(url, headers=HEADERS)
-    print("GitHub fetch status:", r.status_code)
-    print("GitHub response:", r.text)
-    r.raise_for_status()
-    data = r.json()
-    content = base64.b64decode(data["content"]).decode()
-    sha = data["sha"]
-    return json.loads(content), sha
+    try:
+        r = requests.get(url, headers=HEADERS, timeout=10)
+        print("GitHub fetch status:", r.status_code)
+        if r.status_code != 200:
+            print("GitHub response:", r.text)
+            raise Exception(f"GitHub fetch failed with {r.status_code}")
+        data = r.json()
+        content = base64.b64decode(data["content"]).decode()
+        sha = data["sha"]
+        return json.loads(content), sha
+    except Exception as e:
+        print("Error fetching users.json from GitHub:", e)
+        raise e
+
 
 
 def update_users(users, sha):
