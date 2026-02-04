@@ -36,11 +36,38 @@ offset = None
 while True:
     updates = get_updates(offset)
 
-    if "result" in updates:
+    if updates.get("result"):
         for update in updates["result"]:
             offset = update["update_id"] + 1
 
-            # -------- /start command --------
+            # ---- Handle button clicks FIRST ----
+            if "callback_query" in update:
+                query = update["callback_query"]
+                callback_id = query["id"]
+                chat_id = query["message"]["chat"]["id"]
+                data = query["data"]
+
+                answer_callback(callback_id)
+
+                if data == "day1":
+                    lesson = (
+                        "📘 <b>German Day 1 — Basics</b>\n\n"
+                        "Hallo = Hello\n"
+                        "Pronunciation: HA-lo\n\n"
+                        "Wie geht es dir? = How are you?\n"
+                        "Pronunciation: Vee gayt es deer\n\n"
+                        "Woher kommst du? = Where are you from?\n"
+                        "Pronunciation: Vo-hair komst doo\n\n"
+                        "Ich bin Faizan. = I am Faizan.\n"
+                        "Pronunciation: Ikh bin Faizan\n\n"
+                        "Danke = Thank you\n"
+                        "Bitte = Please\n\n"
+                        "✅ Day 1 Completed!"
+                    )
+
+                    send_message(chat_id, lesson)
+
+            # ---- Handle messages ----
             if "message" in update:
                 msg = update["message"]
                 chat_id = msg["chat"]["id"]
@@ -50,10 +77,9 @@ while True:
                 if text == "/start":
                     welcome = (
                         f"👋 Hallo {name}!\n\n"
-                        "🇩🇪 Willkommen beim German Daily Bot!\n"
-                        "🇬🇧 Welcome to German Daily Bot!\n\n"
-                        "📘 Start learning German step by step.\n"
-                        "Click below to begin Day 1."
+                        "🇩🇪 Willkommen beim German Daily Bot\n"
+                        "🇬🇧 Welcome to German Daily Bot\n\n"
+                        "Click below to begin learning."
                     )
 
                     buttons = {
@@ -63,33 +89,5 @@ while True:
                     }
 
                     send_message(chat_id, welcome, buttons)
-
-            # -------- Button Click --------
-            if "callback_query" in update:
-                query = update["callback_query"]
-                chat_id = query["message"]["chat"]["id"]
-                data = query["data"]
-                callback_id = query["id"]
-
-                # stop loading animation
-                answer_callback(callback_id)
-
-                if data == "day1":
-                    lesson = (
-                        "📘 <b>German Day 1</b>\n\n"
-
-                        "Hallo = Hello\n"
-                        "Pronunciation: HA-lo\n\n"
-
-                        "Wie geht es dir? = How are you?\n"
-                        "Pronunciation: Vee gayt es deer\n\n"
-
-                        "Woher kommst du? = Where are you from?\n"
-                        "Pronunciation: Vo-hair komst doo\n\n"
-
-                        "Practice speaking today! 🇩🇪"
-                    )
-
-                    send_message(chat_id, lesson)
 
     time.sleep(1)
