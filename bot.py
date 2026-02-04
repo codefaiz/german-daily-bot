@@ -4,7 +4,6 @@ import time
 import json
 
 TOKEN = os.getenv("BOT_TOKEN")
-
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
 def send_message(chat_id, text, buttons=None):
@@ -18,6 +17,12 @@ def send_message(chat_id, text, buttons=None):
         data["reply_markup"] = json.dumps(buttons)
 
     requests.post(BASE_URL + "/sendMessage", data=data)
+
+def answer_callback(callback_id):
+    requests.post(
+        BASE_URL + "/answerCallbackQuery",
+        data={"callback_query_id": callback_id}
+    )
 
 def get_updates(offset=None):
     params = {"timeout": 100, "offset": offset}
@@ -35,7 +40,7 @@ while True:
         for update in updates["result"]:
             offset = update["update_id"] + 1
 
-            # Handle /start message
+            # -------- /start command --------
             if "message" in update:
                 msg = update["message"]
                 chat_id = msg["chat"]["id"]
@@ -44,10 +49,11 @@ while True:
 
                 if text == "/start":
                     welcome = (
-                        f"👋 Welcome {name}!\n\n"
-                        "🇩🇪 Welcome to German Daily Bot\n"
-                        "🇬🇧 Learn German step by step.\n\n"
-                        "Click below to start learning.\n"
+                        f"👋 Hallo {name}!\n\n"
+                        "🇩🇪 Willkommen beim German Daily Bot!\n"
+                        "🇬🇧 Welcome to German Daily Bot!\n\n"
+                        "📘 Start learning German step by step.\n"
+                        "Click below to begin Day 1."
                     )
 
                     buttons = {
@@ -58,22 +64,30 @@ while True:
 
                     send_message(chat_id, welcome, buttons)
 
-            # Handle button clicks
+            # -------- Button Click --------
             if "callback_query" in update:
                 query = update["callback_query"]
                 chat_id = query["message"]["chat"]["id"]
                 data = query["data"]
+                callback_id = query["id"]
+
+                # stop loading animation
+                answer_callback(callback_id)
 
                 if data == "day1":
                     lesson = (
                         "📘 <b>German Day 1</b>\n\n"
+
                         "Hallo = Hello\n"
                         "Pronunciation: HA-lo\n\n"
+
                         "Wie geht es dir? = How are you?\n"
                         "Pronunciation: Vee gayt es deer\n\n"
+
                         "Woher kommst du? = Where are you from?\n"
                         "Pronunciation: Vo-hair komst doo\n\n"
-                        "Reply in German today! 🇩🇪"
+
+                        "Practice speaking today! 🇩🇪"
                     )
 
                     send_message(chat_id, lesson)
