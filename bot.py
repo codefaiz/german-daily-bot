@@ -3,13 +3,14 @@ import requests
 import time
 import json
 
+# ================= CONFIG =================
 TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
     raise ValueError("BOT_TOKEN environment variable not set")
 
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
-
+# ================= FUNCTIONS =================
 def send_message(chat_id, text, buttons=None):
     payload = {
         "chat_id": chat_id,
@@ -48,8 +49,8 @@ def get_updates(offset=None):
         print("Get updates error:", e)
         return {}
 
-
-print("🤖 Bot running...")
+# ================= BOT LOOP =================
+print("🤖 German Daily Bot is running...")
 offset = None
 
 while True:
@@ -58,7 +59,7 @@ while True:
     for update in updates.get("result", []):
         offset = update["update_id"] + 1
 
-        # -------- Messages --------
+        # -------- /start command --------
         if "message" in update:
             msg = update["message"]
             chat_id = msg["chat"]["id"]
@@ -68,9 +69,9 @@ while True:
             if text == "/start":
                 welcome = (
                     f"👋 Hallo {name}!\n\n"
-                    "🇩🇪 Willkommen beim German Daily Bot!\n"
-                    "🇬🇧 Welcome to German Daily Bot!\n\n"
-                    "📘 Start learning German step by step.\n"
+                    "🇩🇪 Willkommen beim German Daily Bot\n"
+                    "🇬🇧 Welcome to German Daily Bot\n\n"
+                    "📘 Learn German step by step.\n"
                     "Click below to begin Day 1."
                 )
 
@@ -82,7 +83,7 @@ while True:
 
                 send_message(chat_id, welcome, buttons)
 
-        # -------- Callback Queries --------
+        # -------- Button click --------
         if "callback_query" in update:
             query = update["callback_query"]
             chat_id = query["message"]["chat"]["id"]
@@ -92,14 +93,39 @@ while True:
 
             if data == "day1":
                 lesson = (
-                    "📘 <b>German Day 1</b>\n\n"
+                    "📘 <b>German – Day 1: Basics</b>\n\n"
+
+                    "👋 <b>Greeting</b>\n"
                     "<b>Hallo</b> = Hello\n"
-                    "Pronunciation: HA-lo\n\n"
+                    "Pronunciation: <i>HA-lo</i>\n\n"
+
+                    "💬 <b>How are you?</b>\n"
                     "<b>Wie geht es dir?</b> = How are you?\n"
-                    "Pronunciation: Vee gayt es deer\n\n"
+                    "Pronunciation: <i>Vee gayt es deer</i>\n\n"
+
+                    "🙂 <b>Common answers</b>\n"
+                    "<b>Mir geht es gut</b> = I am fine\n"
+                    "Pronunciation: <i>Meer gayt es goot</i>\n\n"
+
+                    "<b>Es geht</b> = So-so / Not bad\n"
+                    "Pronunciation: <i>Es gayt</i>\n\n"
+
+                    "🌍 <b>Where are you from?</b>\n"
                     "<b>Woher kommst du?</b> = Where are you from?\n"
-                    "Pronunciation: Vo-hair komst doo\n\n"
-                    "🗣 Practice speaking today!"
+                    "Pronunciation: <i>Vo-hair komst doo</i>\n\n"
+
+                    "🧑 <b>I am from…</b>\n"
+                    "<b>Ich komme aus Indien</b> = I am from India\n"
+                    "Pronunciation: <i>Ikh komme aus In-dee-en</i>\n\n"
+
+                    "📝 <b>Practice (say aloud)</b>\n"
+                    "➡ Hallo!\n"
+                    "➡ Wie geht es dir?\n"
+                    "➡ Ich komme aus ____\n\n"
+
+                    "👏 Great job! You completed Day 1."
                 )
 
                 send_message(chat_id, lesson)
+
+    # Long polling already waits — no extra sleep needed
