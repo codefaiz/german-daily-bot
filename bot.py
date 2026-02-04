@@ -89,33 +89,37 @@ while True:
 
             answer_callback(query["id"])
 
+            # -------- Day 1 Lesson --------
             if data == "day1":
                 lesson = (
                     "📘 <b>German Day 1</b>\n\n"
                     "1️⃣ <b>Hallo</b> = Hello\n"
                     "Pronunciation: HA-lo\n"
-                    "Example: Hallo! Wie geht's? (Hello! How are you?)\n\n"
+                    "Example: Hallo! Wie geht's? (HA-lo! Vee gayt es geets?)\n\n"
                     "2️⃣ <b>Wie geht es dir?</b> = How are you?\n"
                     "Pronunciation: Vee gayt es deer\n"
-                    "Example: Wie geht es dir heute? (How are you today?)\n\n"
+                    "Example: Wie geht es dir heute? (Vee gayt es deer hoy-te?)\n\n"
                     "3️⃣ <b>Woher kommst du?</b> = Where are you from?\n"
                     "Pronunciation: Vo-hair komst doo\n"
-                    "Example: Woher kommst du? Ich komme aus Deutschland. (Where are you from? I come from Germany.)\n\n"
+                    "Example: Woher kommst du? Ich komme aus Deutschland. (Vo-hair komst doo? Ish komme ous Dooych-lahnd.)\n\n"
                     "📝 Practice:\n"
                     "- Say each sentence aloud 3 times\n"
                     "- Try greeting a friend in German\n"
-                    "- Write your own answer to “Woher kommst du?” in German\n\n"
-                    "✅ Ready for a mini quiz?"
+                    "- Write your own answer to “Woher kommst du?” in German"
                 )
 
-                buttons = {
+                # Only practice tips, no quiz button yet
+                send_message(chat_id, lesson)
+
+                # Add a button for quiz separately
+                quiz_button = {
                     "inline_keyboard": [
                         [{"text": "📝 Take Mini Quiz", "callback_data": "quiz_day1"}]
                     ]
                 }
+                send_message(chat_id, "✅ Ready for a mini quiz? Click below when you are ready!", quiz_button)
 
-                send_message(chat_id, lesson, buttons)
-
+            # -------- Day 1 Quiz --------
             elif data == "quiz_day1":
                 quiz = (
                     "📝 <b>Day 1 Mini Quiz</b>\n\n"
