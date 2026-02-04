@@ -24,11 +24,14 @@ HEADERS = {
 def get_users():
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILE}?ref={GITHUB_BRANCH}"
     r = requests.get(url, headers=HEADERS)
+    print("GitHub fetch status:", r.status_code)
+    print("GitHub response:", r.text)
     r.raise_for_status()
     data = r.json()
     content = base64.b64decode(data["content"]).decode()
     sha = data["sha"]
     return json.loads(content), sha
+
 
 def update_users(users, sha):
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILE}"
