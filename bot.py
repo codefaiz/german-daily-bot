@@ -36,11 +36,38 @@ offset = None
 while True:
     updates = get_updates(offset)
 
-    if "result" in updates:
+    if updates.get("result"):
         for update in updates["result"]:
             offset = update["update_id"] + 1
 
-            # ---------- /start ----------
+            # ---- Handle button clicks FIRST ----
+            if "callback_query" in update:
+                query = update["callback_query"]
+                callback_id = query["id"]
+                chat_id = query["message"]["chat"]["id"]
+                data = query["data"]
+
+                answer_callback(callback_id)
+
+                if data == "day1":
+                    lesson = (
+                        "📘 <b>German Day 1 — Basics</b>\n\n"
+                        "Hallo = Hello\n"
+                        "Pronunciation: HA-lo\n\n"
+                        "Wie geht es dir? = How are you?\n"
+                        "Pronunciation: Vee gayt es deer\n\n"
+                        "Woher kommst du? = Where are you from?\n"
+                        "Pronunciation: Vo-hair komst doo\n\n"
+                        "Ich bin Faizan. = I am Faizan.\n"
+                        "Pronunciation: Ikh bin Faizan\n\n"
+                        "Danke = Thank you\n"
+                        "Bitte = Please\n\n"
+                        "✅ Day 1 Completed!"
+                    )
+
+                    send_message(chat_id, lesson)
+
+            # ---- Handle messages ----
             if "message" in update:
                 msg = update["message"]
                 chat_id = msg["chat"]["id"]
@@ -62,50 +89,5 @@ while True:
                     }
 
                     send_message(chat_id, welcome, buttons)
-
-            # ---------- Button clicks ----------
-            if "callback_query" in update:
-                query = update["callback_query"]
-                callback_id = query["id"]
-                chat_id = query["message"]["chat"]["id"]
-                data = query["data"]
-
-                answer_callback(callback_id)
-
-                if data == "day1":
-                    lesson = (
-                        "📘 <b>German Day 1 — Basics</b>\n\n"
-
-                        "👋 Greeting\n"
-                        "Hallo = Hello\n"
-                        "Pronunciation: HA-lo\n\n"
-
-                        "😊 Asking how someone is\n"
-                        "Wie geht es dir? = How are you?\n"
-                        "Pronunciation: Vee gayt es deer\n\n"
-
-                        "🌍 Asking origin\n"
-                        "Woher kommst du? = Where are you from?\n"
-                        "Pronunciation: Vo-hair komst doo\n\n"
-
-                        "🙋 Introducing yourself\n"
-                        "Ich bin Faizan. = I am Faizan.\n"
-                        "Pronunciation: Ikh bin Faizan\n\n"
-
-                        "🙏 Polite words\n"
-                        "Danke = Thank you\n"
-                        "Pronunciation: DAN-ke\n\n"
-
-                        "Bitte = Please / Welcome\n"
-                        "Pronunciation: BIT-te\n\n"
-
-                        "🗣 Practice Task\n"
-                        "Reply with:\n"
-                        "'Hallo, ich bin <your name>'\n\n"
-
-                        "✅ Day 1 Completed!"
-                    )
-
-                    send_message(chat_id, lesson)
 
     time.sleep(1)
