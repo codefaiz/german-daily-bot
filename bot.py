@@ -6,6 +6,7 @@ import json
 TOKEN = os.getenv("BOT_TOKEN")
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
+# ---------- Send Message ----------
 def send_message(chat_id, text, buttons=None):
     data = {
         "chat_id": chat_id,
@@ -18,12 +19,14 @@ def send_message(chat_id, text, buttons=None):
 
     requests.post(BASE_URL + "/sendMessage", data=data)
 
+# ---------- Stop button loading ----------
 def answer_callback(callback_id):
     requests.post(
         BASE_URL + "/answerCallbackQuery",
         data={"callback_query_id": callback_id}
     )
 
+# ---------- Get updates ----------
 def get_updates(offset=None):
     params = {"timeout": 100, "offset": offset}
     r = requests.get(BASE_URL + "/getUpdates", params=params)
@@ -40,13 +43,12 @@ while True:
         for update in updates["result"]:
             offset = update["update_id"] + 1
 
-            # ---------- Button Click ----------
+            # ---- Handle button clicks FIRST ----
             if "callback_query" in update:
                 query = update["callback_query"]
                 callback_id = query["id"]
                 chat_id = query["message"]["chat"]["id"]
                 data = query["data"]
-                name = query["from"].get("first_name", "Friend")
 
                 answer_callback(callback_id)
 
@@ -58,7 +60,7 @@ while True:
                         "Hallo = Hello\n"
                         "Pronunciation: HA-lo\n\n"
 
-                        "😊 Asking condition\n"
+                        "😊 Asking how someone is\n"
                         "Wie geht es dir? = How are you?\n"
                         "Pronunciation: Vee gayt es deer\n\n"
 
@@ -67,26 +69,25 @@ while True:
                         "Pronunciation: Vo-hair komst doo\n\n"
 
                         "🙋 Introducing yourself\n"
-                        f"Ich bin {name}. = I am {name}.\n"
-                        "Pronunciation: Ikh bin <name>\n\n"
+                        "Ich bin Faizan. = I am Faizan.\n"
+                        "Pronunciation: Ikh bin Faizan\n\n"
 
                         "🙏 Polite words\n"
                         "Danke = Thank you\n"
                         "Pronunciation: DAN-ke\n\n"
-
                         "Bitte = Please / You're welcome\n"
                         "Pronunciation: BIT-te\n\n"
 
                         "🗣 Practice Task\n"
                         "Reply with:\n"
-                        "Hallo, ich bin <your name>\n\n"
+                        "'Hallo, ich bin <your name>'\n\n"
 
                         "✅ Day 1 Completed!"
                     )
 
                     send_message(chat_id, lesson)
 
-            # ---------- Messages ----------
+            # ---- Handle messages ----
             if "message" in update:
                 msg = update["message"]
                 chat_id = msg["chat"]["id"]
@@ -98,7 +99,6 @@ while True:
                         f"👋 Hallo {name}!\n\n"
                         "🇩🇪 Willkommen beim German Daily Bot\n"
                         "🇬🇧 Welcome to German Daily Bot\n\n"
-                        "📘 Learn German step by step.\n"
                         "Click below to begin learning."
                     )
 
