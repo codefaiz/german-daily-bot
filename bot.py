@@ -76,19 +76,36 @@ while True:
 
                 if data == "day1":
                     lesson = (
-                        "📘 <b>German Day 1</b>\n\n"
+    "📘 <b>German Day 1 — Basics</b>\n\n"
 
-                        "Hallo = Hello\n"
-                        "Pronunciation: HA-lo\n\n"
+    "👋 Greeting\n"
+    "Hallo = Hello\n"
+    "Pronunciation: HA-lo\n\n"
 
-                        "Wie geht es dir? = How are you?\n"
-                        "Pronunciation: Vee gayt es deer\n\n"
+    "😊 Asking how someone is\n"
+    "Wie geht es dir? = How are you?\n"
+    "Pronunciation: Vee gayt es deer\n\n"
 
-                        "Woher kommst du? = Where are you from?\n"
-                        "Pronunciation: Vo-hair komst doo\n\n"
+    "🌍 Asking origin\n"
+    "Woher kommst du? = Where are you from?\n"
+    "Pronunciation: Vo-hair komst doo\n\n"
 
-                        "Practice speaking today! 🇩🇪"
-                    )
+    "🙋 Introducing yourself\n"
+    "Ich bin Faizan. = I am Faizan.\n"
+    "Pronunciation: Ikh bin Faizan\n\n"
+
+    "🙏 Polite words\n"
+    "Danke = Thank you\n"
+    "Pronunciation: DAN-ke\n\n"
+    "Bitte = Please / Welcome\n"
+    "Pronunciation: BIT-te\n\n"
+
+    "🗣 Practice Task\n"
+    "Reply with:\n"
+    "'Hallo, ich bin <your name>'\n\n"
+
+    "✅ Day 1 Completed!"
+)
 
                     send_message(chat_id, lesson)
 
