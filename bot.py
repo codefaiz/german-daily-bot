@@ -47,6 +47,9 @@ while True:
                 chat_id = query["message"]["chat"]["id"]
                 data = query["data"]
 
+                # get user name dynamically
+                name = query["from"].get("first_name", "Friend")
+
                 answer_callback(callback_id)
 
                 if data == "day1":
@@ -54,14 +57,19 @@ while True:
                         "📘 <b>German Day 1 — Basics</b>\n\n"
                         "Hallo = Hello\n"
                         "Pronunciation: HA-lo\n\n"
+
                         "Wie geht es dir? = How are you?\n"
                         "Pronunciation: Vee gayt es deer\n\n"
+
                         "Woher kommst du? = Where are you from?\n"
                         "Pronunciation: Vo-hair komst doo\n\n"
-                        "Ich bin Faizan. = I am Faizan.\n"
-                        "Pronunciation: Ikh bin Faizan\n\n"
+
+                        f"Ich bin {name}. = I am {name}.\n"
+                        "Pronunciation: Ikh bin <your name>\n\n"
+
                         "Danke = Thank you\n"
                         "Bitte = Please\n\n"
+
                         "✅ Day 1 Completed!"
                     )
 
