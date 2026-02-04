@@ -41,61 +41,39 @@ while True:
             offset = update["update_id"] + 1
 
             # ---- Handle button clicks FIRST ----
-            if "callback_query" in update:
-                query = update["callback_query"]
-                callback_id = query["id"]
-                chat_id = query["message"]["chat"]["id"]
-                data = query["data"]
+if "callback_query" in update:
+    query = update["callback_query"]
+    callback_id = query["id"]
+    chat_id = query["message"]["chat"]["id"]
+    data = query["data"]
 
-                # get user name dynamically
-                name = query["from"].get("first_name", "Friend")
+    # SAFE name extraction
+    user = query.get("from", {})
+    name = user.get("first_name") or "Friend"
 
-                answer_callback(callback_id)
+    answer_callback(callback_id)
 
-                if data == "day1":
-                    lesson = (
-                        "📘 <b>German Day 1 — Basics</b>\n\n"
-                        "Hallo = Hello\n"
-                        "Pronunciation: HA-lo\n\n"
+    if data == "day1":
+        lesson = (
+            "📘 <b>German Day 1 — Basics</b>\n\n"
+            "Hallo = Hello\n"
+            "Pronunciation: HA-lo\n\n"
 
-                        "Wie geht es dir? = How are you?\n"
-                        "Pronunciation: Vee gayt es deer\n\n"
+            "Wie geht es dir? = How are you?\n"
+            "Pronunciation: Vee gayt es deer\n\n"
 
-                        "Woher kommst du? = Where are you from?\n"
-                        "Pronunciation: Vo-hair komst doo\n\n"
+            "Woher kommst du? = Where are you from?\n"
+            "Pronunciation: Vo-hair komst doo\n\n"
 
-                        f"Ich bin {name}. = I am {name}.\n"
-                        "Pronunciation: Ikh bin <your name>\n\n"
+            f"Ich bin {name}. = I am {name}.\n"
+            "Pronunciation: Ikh bin <your name>\n\n"
 
-                        "Danke = Thank you\n"
-                        "Bitte = Please\n\n"
+            "Danke = Thank you\n"
+            "Bitte = Please\n\n"
 
-                        "✅ Day 1 Completed!"
-                    )
+            "✅ Day 1 Completed!"
+        )
 
-                    send_message(chat_id, lesson)
-
-            # ---- Handle messages ----
-            if "message" in update:
-                msg = update["message"]
-                chat_id = msg["chat"]["id"]
-                text = msg.get("text", "")
-                name = msg["from"].get("first_name", "Friend")
-
-                if text == "/start":
-                    welcome = (
-                        f"👋 Hallo {name}!\n\n"
-                        "🇩🇪 Willkommen beim German Daily Bot\n"
-                        "🇬🇧 Welcome to German Daily Bot\n\n"
-                        "Click below to begin learning."
-                    )
-
-                    buttons = {
-                        "inline_keyboard": [
-                            [{"text": "📘 Start Day 1", "callback_data": "day1"}]
-                        ]
-                    }
-
-                    send_message(chat_id, welcome, buttons)
+        send_message(chat_id, lesson)
 
     time.sleep(1)
