@@ -16,7 +16,6 @@ def send_message(chat_id, text, buttons=None):
         "text": text,
         "parse_mode": "HTML"
     }
-
     if buttons:
         payload["reply_markup"] = json.dumps(buttons)
 
@@ -93,13 +92,36 @@ while True:
             if data == "day1":
                 lesson = (
                     "📘 <b>German Day 1</b>\n\n"
-                    "<b>Hallo</b> = Hello\n"
-                    "Pronunciation: HA-lo\n\n"
-                    "<b>Wie geht es dir?</b> = How are you?\n"
-                    "Pronunciation: Vee gayt es deer\n\n"
-                    "<b>Woher kommst du?</b> = Where are you from?\n"
-                    "Pronunciation: Vo-hair komst doo\n\n"
-                    "🗣 Practice speaking today!"
+                    "1️⃣ <b>Hallo</b> = Hello\n"
+                    "Pronunciation: HA-lo\n"
+                    "Example: Hallo! Wie geht's? (Hello! How are you?)\n\n"
+                    "2️⃣ <b>Wie geht es dir?</b> = How are you?\n"
+                    "Pronunciation: Vee gayt es deer\n"
+                    "Example: Wie geht es dir heute? (How are you today?)\n\n"
+                    "3️⃣ <b>Woher kommst du?</b> = Where are you from?\n"
+                    "Pronunciation: Vo-hair komst doo\n"
+                    "Example: Woher kommst du? Ich komme aus Deutschland. (Where are you from? I come from Germany.)\n\n"
+                    "📝 Practice:\n"
+                    "- Say each sentence aloud 3 times\n"
+                    "- Try greeting a friend in German\n"
+                    "- Write your own answer to “Woher kommst du?” in German\n\n"
+                    "✅ Ready for a mini quiz?"
                 )
 
-                send_message(chat_id, lesson)
+                buttons = {
+                    "inline_keyboard": [
+                        [{"text": "📝 Take Mini Quiz", "callback_data": "quiz_day1"}]
+                    ]
+                }
+
+                send_message(chat_id, lesson, buttons)
+
+            elif data == "quiz_day1":
+                quiz = (
+                    "📝 <b>Day 1 Mini Quiz</b>\n\n"
+                    "1️⃣ How do you say 'Hello' in German?\n"
+                    "2️⃣ How do you ask 'How are you?' in German?\n"
+                    "3️⃣ How do you ask someone where they are from in German?\n\n"
+                    "Reply in chat with your answers!"
+                )
+                send_message(chat_id, quiz)
