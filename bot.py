@@ -8,30 +8,12 @@ if not TOKEN:
 
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
-LESSONS_FILE = "lessons.json"
-PROGRESS_FILE = "progress.json"
-
 # Load lessons
-with open(LESSONS_FILE, "r", encoding="utf-8") as f:
+with open("lessons.json", "r", encoding="utf-8") as f:
     LESSONS = json.load(f)
 
-# Load or create progress storage
-if os.path.exists(PROGRESS_FILE):
-    with open(PROGRESS_FILE, "r") as f:
-        USER_PROGRESS = json.load(f)
-else:
-    USER_PROGRESS = {}
-
-def save_progress():
-    with open(PROGRESS_FILE, "w") as f:
-        json.dump(USER_PROGRESS, f)
-
-def set_progress(user_id, day):
-    USER_PROGRESS[str(user_id)] = day
-    save_progress()
-
-def get_progress(user_id):
-    return USER_PROGRESS.get(str(user_id), "day1")
+# Temporary session memory
+USER_STATE = {}
 
 # ---------------- Telegram helpers ----------------
 def send_message(chat_id, text, buttons=None):
@@ -57,7 +39,7 @@ def get_updates(offset=None):
     r = requests.get(f"{BASE_URL}/getUpdates", params=params)
     return r.json()
 
-# ---------------- Lesson format ----------------
+# ---------------- Lesson formatting ----------------
 def format_lesson(day_key):
     day = LESSONS[day_key]
 
@@ -77,16 +59,6 @@ def format_lesson(day_key):
 
     return text
 
-def format_quiz(day_key):
-    day = LESSONS[day_key]
-    text = f"📝 <b>{day['title']} Quiz</b>\n\n"
-
-    for i, q in enumerate(day["quiz"], 1):
-        text += f"{i}️⃣ {q}\n"
-
-    text += "\nReply with your answers!"
-    return text
-
 def lesson_buttons(day_key):
     day_num = int(day_key.replace("day", ""))
     prev_day = f"day{day_num-1}"
@@ -101,11 +73,24 @@ def lesson_buttons(day_key):
         row.append({"text": "➡ Next", "callback_data": next_day})
 
     keyboard = [
+        [{"text": "✍ Practice", "callback_data": f"practice_{day_key}"}],
         [{"text": "📝 Quiz", "callback_data": f"quiz_{day_key}"}],
         row
     ]
 
     return {"inline_keyboard": keyboard}
+
+# ---------------- Quiz ----------------
+def quiz_buttons(day_key, index):
+    q = LESSONS[day_key]["quiz"][index]
+
+    buttons = [
+        [{"text": opt,
+          "callback_data": f"quizans_{day_key}_{index}_{opt}"}]
+        for opt in q["options"]
+    ]
+
+    return {"inline_keyboard": buttons}
 
 # ---------------- Bot loop ----------------
 print("Bot running...")
@@ -117,33 +102,34 @@ while True:
     for update in updates.get("result", []):
         offset = update["update_id"] + 1
 
-        # -------- Message --------
+        # -------- Message handling --------
         if "message" in update:
             msg = update["message"]
             chat_id = msg["chat"]["id"]
             user_id = msg["from"]["id"]
             text = msg.get("text", "")
-            name = msg["from"].get("first_name", "Friend")
 
-            if text == "/start":
-                current_day = get_progress(user_id)
+            # Practice answer handling
+            state = USER_STATE.get(user_id)
 
-                welcome = (
-                    f"👋 <b>Hallo {name}!</b>\n\n"
-                    "Welcome to German Daily Bot.\n\n"
-                    "Continue your lesson below."
-                )
+            if state and state["mode"] == "practice":
+                day_key = state["day"]
+                practice = LESSONS[day_key]["practice"]
 
-                buttons = {
-                    "inline_keyboard": [
-                        [{"text": "▶ Continue Lesson",
-                          "callback_data": current_day}]
-                    ]
-                }
+                keywords = practice["expected_keywords"]
 
-                send_message(chat_id, welcome, buttons)
+                if all(k.lower() in text.lower() for k in keywords):
+                    send_message(chat_id,
+                                 "✅ Good answer!\nKeep practicing aloud.")
+                else:
+                    send_message(
+                        chat_id,
+                        f"⚠ Try again.\nHint: {practice['hint']}"
+                    )
 
-        # -------- Callback --------
+                USER_STATE.pop(user_id, None)
+
+        # -------- Callback handling --------
         if "callback_query" in update:
             query = update["callback_query"]
             data = query["data"]
@@ -154,13 +140,68 @@ while True:
 
             # Show lesson
             if data.startswith("day"):
-                set_progress(user_id, data)
-
                 lesson_text = format_lesson(data)
-                send_message(chat_id, lesson_text,
+                send_message(chat_id,
+                             lesson_text,
                              lesson_buttons(data))
 
-            # Show quiz
+            # Practice mode
+            elif data.startswith("practice_"):
+                day_key = data.replace("practice_", "")
+                practice = LESSONS[day_key]["practice"]
+
+                USER_STATE[user_id] = {
+                    "mode": "practice",
+                    "day": day_key
+                }
+
+                send_message(
+                    chat_id,
+                    f"✍ <b>Practice Time</b>\n\n"
+                    f"{practice['question']}\n\n"
+                    f"{practice['instruction']}"
+                )
+
+            # Quiz start
             elif data.startswith("quiz_day"):
                 day_key = data.replace("quiz_", "")
-                send_message(chat_id, format_quiz(day_key))
+                USER_STATE[user_id] = {
+                    "mode": "quiz",
+                    "day": day_key,
+                    "index": 0
+                }
+
+                q = LESSONS[day_key]["quiz"][0]
+
+                send_message(
+                    chat_id,
+                    f"📝 <b>Quiz</b>\n\n{q['question']}",
+                    quiz_buttons(day_key, 0)
+                )
+
+            # Quiz answers
+            elif data.startswith("quizans_"):
+                _, day_key, idx, answer = data.split("_", 3)
+                idx = int(idx)
+
+                correct = LESSONS[day_key]["quiz"][idx]["correct"]
+
+                if answer == correct:
+                    send_message(chat_id, "✅ Correct!")
+                else:
+                    send_message(chat_id,
+                                 f"❌ Correct answer: {correct}")
+
+                next_idx = idx + 1
+                quiz_list = LESSONS[day_key]["quiz"]
+
+                if next_idx < len(quiz_list):
+                    q = quiz_list[next_idx]
+                    send_message(
+                        chat_id,
+                        q["question"],
+                        quiz_buttons(day_key, next_idx)
+                    )
+                else:
+                    send_message(chat_id,
+                                 "🎉 Quiz completed!\nSelect next lesson.")
