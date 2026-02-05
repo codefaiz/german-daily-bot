@@ -2,6 +2,7 @@ import os
 import json
 import requests
 
+# ---------------- CONFIG ----------------
 TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
     raise ValueError("BOT_TOKEN not set")
@@ -11,31 +12,35 @@ BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 LESSONS_FILE = "lessons.json"
 PROGRESS_FILE = "progress.json"
 
-# Load lessons
+# ---------------- LOAD LESSONS ----------------
 with open(LESSONS_FILE, "r", encoding="utf-8") as f:
     LESSONS = json.load(f)
 
-# Load or create progress storage
-if os.path.exists(PROGRESS_FILE):
+# ---------------- PROGRESS HANDLING ----------------
+def load_progress():
+    if not os.path.exists(PROGRESS_FILE):
+        with open(PROGRESS_FILE, "w") as f:
+            json.dump({}, f)
+        return {}
+
     with open(PROGRESS_FILE, "r") as f:
-        USER_PROGRESS = json.load(f)
-else:
-    USER_PROGRESS = {}
+        return json.load(f)
+
+USER_PROGRESS = load_progress()
 
 def save_progress():
-    with open(PROGRESS_FILE, "w", encoding="utf-8") as f:
+    with open(PROGRESS_FILE, "w") as f:
         json.dump(USER_PROGRESS, f, indent=2)
-        f.flush()
 
 def set_progress(user_id, day):
     USER_PROGRESS[str(user_id)] = day
     save_progress()
-    print("Progress saved:", user_id, day)
+    print("Saved:", USER_PROGRESS)
 
 def get_progress(user_id):
     return USER_PROGRESS.get(str(user_id), "day1")
 
-# ---------------- Telegram helpers ----------------
+# ---------------- TELEGRAM HELPERS ----------------
 def send_message(chat_id, text, buttons=None):
     payload = {
         "chat_id": chat_id,
@@ -59,10 +64,9 @@ def get_updates(offset=None):
     r = requests.get(f"{BASE_URL}/getUpdates", params=params)
     return r.json()
 
-# ---------------- Lesson format ----------------
+# ---------------- LESSON FORMAT ----------------
 def format_lesson(day_key):
     day = LESSONS[day_key]
-
     text = f"📘 <b>{day['title']}</b>\n\n"
 
     for i, w in enumerate(day["words"], 1):
@@ -109,8 +113,8 @@ def lesson_buttons(day_key):
 
     return {"inline_keyboard": keyboard}
 
-# ---------------- Bot loop ----------------
-print("Bot running...")
+# ---------------- MAIN LOOP ----------------
+print("🤖 German Daily Bot running...")
 offset = None
 
 while True:
@@ -119,7 +123,7 @@ while True:
     for update in updates.get("result", []):
         offset = update["update_id"] + 1
 
-        # -------- Message --------
+        # -------- Messages --------
         if "message" in update:
             msg = update["message"]
             chat_id = msg["chat"]["id"]
@@ -138,8 +142,10 @@ while True:
 
                 buttons = {
                     "inline_keyboard": [
-                        [{"text": "▶ Continue Lesson",
-                          "callback_data": current_day}]
+                        [{
+                            "text": "▶ Continue Lesson",
+                            "callback_data": current_day
+                        }]
                     ]
                 }
 
@@ -154,16 +160,15 @@ while True:
 
             answer_callback(query["id"])
 
-            # Show lesson
+            # Lesson open
             if data.startswith("day"):
-    print("Opening lesson:", data, "for user:", user_id)
-    set_progress(user_id, data)
+                set_progress(user_id, data)
 
                 lesson_text = format_lesson(data)
                 send_message(chat_id, lesson_text,
                              lesson_buttons(data))
 
-            # Show quiz
+            # Quiz open
             elif data.startswith("quiz_day"):
                 day_key = data.replace("quiz_", "")
                 send_message(chat_id, format_quiz(day_key))
