@@ -23,8 +23,9 @@ else:
     USER_PROGRESS = {}
 
 def save_progress():
-    with open(PROGRESS_FILE, "w") as f:
-        json.dump(USER_PROGRESS, f)
+    with open(PROGRESS_FILE, "w", encoding="utf-8") as f:
+        json.dump(USER_PROGRESS, f, indent=2)
+        f.flush()
 
 def set_progress(user_id, day):
     USER_PROGRESS[str(user_id)] = day
