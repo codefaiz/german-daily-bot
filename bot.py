@@ -1,74 +1,76 @@
 import os
 import json
 import requests
-import time
 
-# -----------------------------
-# Load environment variables
-# -----------------------------
 TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
-    raise ValueError("BOT_TOKEN environment variable not set")
+    raise ValueError("BOT_TOKEN not set")
 
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
-# -----------------------------
-# Load lessons from JSON
-# -----------------------------
-with open("lessons.json", "r", encoding="utf-8") as f:
+LESSONS_FILE = "lessons.json"
+PROGRESS_FILE = "progress.json"
+
+# Load lessons
+with open(LESSONS_FILE, "r", encoding="utf-8") as f:
     LESSONS = json.load(f)
 
-# -----------------------------
-# Helper functions
-# -----------------------------
+# Load or create progress storage
+if os.path.exists(PROGRESS_FILE):
+    with open(PROGRESS_FILE, "r") as f:
+        USER_PROGRESS = json.load(f)
+else:
+    USER_PROGRESS = {}
+
+def save_progress():
+    with open(PROGRESS_FILE, "w") as f:
+        json.dump(USER_PROGRESS, f)
+
+def set_progress(user_id, day):
+    USER_PROGRESS[str(user_id)] = day
+    save_progress()
+
+def get_progress(user_id):
+    return USER_PROGRESS.get(str(user_id), "day1")
+
+# ---------------- Telegram helpers ----------------
 def send_message(chat_id, text, buttons=None):
     payload = {
         "chat_id": chat_id,
         "text": text,
         "parse_mode": "HTML"
     }
+
     if buttons:
         payload["reply_markup"] = json.dumps(buttons)
 
-    try:
-        r = requests.post(f"{BASE_URL}/sendMessage", data=payload, timeout=10)
-        r.raise_for_status()
-    except requests.RequestException as e:
-        print("Send message error:", e)
+    requests.post(f"{BASE_URL}/sendMessage", data=payload)
 
 def answer_callback(callback_id):
-    try:
-        requests.post(
-            f"{BASE_URL}/answerCallbackQuery",
-            data={"callback_query_id": callback_id},
-            timeout=5
-        )
-    except requests.RequestException as e:
-        print("Callback error:", e)
+    requests.post(
+        f"{BASE_URL}/answerCallbackQuery",
+        data={"callback_query_id": callback_id}
+    )
 
 def get_updates(offset=None):
-    try:
-        params = {"timeout": 100, "offset": offset}
-        r = requests.get(f"{BASE_URL}/getUpdates", params=params, timeout=110)
-        r.raise_for_status()
-        return r.json()
-    except requests.RequestException as e:
-        print("Get updates error:", e)
-        return {}
+    params = {"timeout": 100, "offset": offset}
+    r = requests.get(f"{BASE_URL}/getUpdates", params=params)
+    return r.json()
 
-# -----------------------------
-# Lesson rendering
-# -----------------------------
+# ---------------- Lesson format ----------------
 def format_lesson(day_key):
     day = LESSONS[day_key]
+
     text = f"📘 <b>{day['title']}</b>\n\n"
-    
-    for idx, word in enumerate(day["words"], 1):
-        text += f"{idx}️⃣ <b>{word['word']}</b>\n"
-        text += f"{word['meaning']}\n"
-        text += f"<code>Pronunciation:</code> {word['pronunciation']}\n"
-        text += f"<i>Example:</i> {word['example']}\n\n"
-    
+
+    for i, w in enumerate(day["words"], 1):
+        text += (
+            f"{i}️⃣ <b>{w['word']}</b>\n"
+            f"{w['meaning']}\n"
+            f"<code>Pronunciation:</code> {w['pronunciation']}\n"
+            f"<i>Example:</i> {w['example']}\n\n"
+        )
+
     text += "📝 <b>Practice Tips:</b>\n"
     for tip in day["practice_tips"]:
         text += f"• {tip}\n"
@@ -77,16 +79,36 @@ def format_lesson(day_key):
 
 def format_quiz(day_key):
     day = LESSONS[day_key]
-    text = f"📝 <b>{day['title']} Mini Quiz</b>\n\n"
-    for idx, q in enumerate(day["quiz"], 1):
-        text += f"{idx}️⃣ {q}\n"
-    text += "\nReply in chat with your answers!"
+    text = f"📝 <b>{day['title']} Quiz</b>\n\n"
+
+    for i, q in enumerate(day["quiz"], 1):
+        text += f"{i}️⃣ {q}\n"
+
+    text += "\nReply with your answers!"
     return text
 
-# -----------------------------
-# Bot main loop
-# -----------------------------
-print("🤖 German Daily Bot running...")
+def lesson_buttons(day_key):
+    day_num = int(day_key.replace("day", ""))
+    prev_day = f"day{day_num-1}"
+    next_day = f"day{day_num+1}"
+
+    row = []
+
+    if prev_day in LESSONS:
+        row.append({"text": "⬅ Previous", "callback_data": prev_day})
+
+    if next_day in LESSONS:
+        row.append({"text": "➡ Next", "callback_data": next_day})
+
+    keyboard = [
+        [{"text": "📝 Quiz", "callback_data": f"quiz_{day_key}"}],
+        row
+    ]
+
+    return {"inline_keyboard": keyboard}
+
+# ---------------- Bot loop ----------------
+print("Bot running...")
 offset = None
 
 while True:
@@ -95,56 +117,50 @@ while True:
     for update in updates.get("result", []):
         offset = update["update_id"] + 1
 
-        # -------- Messages --------
+        # -------- Message --------
         if "message" in update:
             msg = update["message"]
             chat_id = msg["chat"]["id"]
+            user_id = msg["from"]["id"]
             text = msg.get("text", "")
             name = msg["from"].get("first_name", "Friend")
 
             if text == "/start":
+                current_day = get_progress(user_id)
+
                 welcome = (
                     f"👋 <b>Hallo {name}!</b>\n\n"
-                    "🇩🇪 Willkommen beim <b>German Daily Bot</b>\n"
-                    "🇬🇧 Welcome to <b>German Daily Bot</b>\n\n"
-                    "📘 Start learning German step by step.\n"
-                    "Click the button below to begin <b>Day 1</b>."
+                    "Welcome to German Daily Bot.\n\n"
+                    "Continue your lesson below."
                 )
 
                 buttons = {
                     "inline_keyboard": [
-                        [{"text": "📘 Start Day 1", "callback_data": "day1"}]
+                        [{"text": "▶ Continue Lesson",
+                          "callback_data": current_day}]
                     ]
                 }
 
                 send_message(chat_id, welcome, buttons)
 
-        # -------- Callback Queries --------
+        # -------- Callback --------
         if "callback_query" in update:
             query = update["callback_query"]
-            chat_id = query["message"]["chat"]["id"]
             data = query["data"]
+            chat_id = query["message"]["chat"]["id"]
+            user_id = query["from"]["id"]
 
             answer_callback(query["id"])
 
-            # -------- Day Lesson --------
+            # Show lesson
             if data.startswith("day"):
+                set_progress(user_id, data)
+
                 lesson_text = format_lesson(data)
-                send_message(chat_id, lesson_text)
+                send_message(chat_id, lesson_text,
+                             lesson_buttons(data))
 
-                # Next buttons: Quiz + Next Day
-                day_number = int(data.replace("day", ""))
-                next_day_key = f"day{day_number + 1}"
-                buttons = [
-                    [{"text": "📝 Take Mini Quiz", "callback_data": f"quiz_{data}"}]
-                ]
-                if next_day_key in LESSONS:
-                    buttons[0].append({"text": "➡ Next Day", "callback_data": next_day_key})
-
-                send_message(chat_id, "✅ Ready for a mini quiz or next lesson? Click below:", {"inline_keyboard": buttons})
-
-            # -------- Quiz --------
+            # Show quiz
             elif data.startswith("quiz_day"):
                 day_key = data.replace("quiz_", "")
-                quiz_text = format_quiz(day_key)
-                send_message(chat_id, quiz_text)
+                send_message(chat_id, format_quiz(day_key))
