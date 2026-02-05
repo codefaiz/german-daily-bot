@@ -1,35 +1,44 @@
 {
   "day1": {
-    "title": "German Day 1",
+    "title": "German Day 1 — Greetings",
+
     "words": [
       {
         "word": "Hallo",
         "meaning": "Hello",
         "pronunciation": "HA-lo",
-        "example": "Hallo! Wie geht's? = Hello! How are you?"
-      },
-      {
-        "word": "Wie geht es dir?",
-        "meaning": "How are you?",
-        "pronunciation": "Vee gayt es deer",
-        "example": "Wie geht es dir heute? = How are you today?"
-      },
-      {
-        "word": "Woher kommst du?",
-        "meaning": "Where are you from?",
-        "pronunciation": "Vo-hair komst doo",
-        "example": "Woher kommst du? Ich komme aus Deutschland."
+        "example": "Hallo! Wie geht's?"
       }
     ],
-    "practice_tips": [
-      "Say each sentence aloud 3 times",
-      "Greet someone in German",
-      "Write your own answer to the question"
-    ],
+
+    "practice": {
+      "question": "Woher kommst du?",
+      "instruction": "Answer in German. Example: Ich komme aus Indien.",
+      "hint": "Use: Ich komme aus + country",
+      "expected_keywords": ["komme", "aus"]
+    },
+
     "quiz": [
-      "How do you say Hello in German?",
-      "How do you ask How are you?",
-      "How do you ask where someone is from?"
+      {
+        "question": "How do you say 'Hello' in German?",
+        "options": ["Hallo", "Danke", "Tschüss"],
+        "correct": "Hallo"
+      },
+      {
+        "question": "How do you ask 'How are you?'",
+        "options": [
+          "Wie geht es dir?",
+          "Guten Morgen",
+          "Wo wohnst du?"
+        ],
+        "correct": "Wie geht es dir?"
+      }
+    ],
+
+    "practice_tips": [
+      "Say sentences aloud 3 times",
+      "Try greeting someone today",
+      "Write your own introduction"
     ]
   }
 }
