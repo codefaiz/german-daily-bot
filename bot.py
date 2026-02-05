@@ -30,6 +30,7 @@ def save_progress():
 def set_progress(user_id, day):
     USER_PROGRESS[str(user_id)] = day
     save_progress()
+    print("Progress saved:", user_id, day)
 
 def get_progress(user_id):
     return USER_PROGRESS.get(str(user_id), "day1")
