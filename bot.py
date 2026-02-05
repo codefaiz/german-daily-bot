@@ -156,7 +156,8 @@ while True:
 
             # Show lesson
             if data.startswith("day"):
-                set_progress(user_id, data)
+    print("Opening lesson:", data, "for user:", user_id)
+    set_progress(user_id, data)
 
                 lesson_text = format_lesson(data)
                 send_message(chat_id, lesson_text,
